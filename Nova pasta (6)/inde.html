@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krakens & Cannons: Cerco Total</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ATMOSFERA NOTURNA PREMIUM -->
+    <div id="ambient-container">
+        <div class="sky-gradient"></div>
+        <div class="stars-layer"></div>
+        <div class="moon-glow"></div>
+        <div class="mist-layer mist-deep"></div>
+    </div>
+
+    <!-- VÍNCULO DE SANGUE / INTERFACE DE DANO DO JOGADOR -->
+    <div id="player-damage-overlay"></div>
+
+    <!-- 1. CENA DE COMBATE -->
+    <section id="boss-fight-scene" class="scene active">
+        <div class="battle-ui">
+            <div class="top-status-bar">
+                <div class="timer-container">⚔️ TEMPO DE REFORÇOS: <span id="timer">30</span>s</div>
+                <!-- NOVA BARRA DE VIDA DO JOGADOR -->
+                <div class="player-health-card">
+                    <span class="player-hp-label">🛡️ INTEGRIDADE DO SEU CASCO: <span id="player-hp-text">100</span>%</span>
+                    <div class="health-bar-bg"><div id="hp-player" class="hp-fill player-hp" style="width: 100%;"></div></div>
+                </div>
+            </div>
+            
+            <div class="enemies-health-grid">
+                <div class="health-card">
+                    <span class="enemy-label">🏴‍☠️ Galeão: Queen Anne's Revenge</span>
+                    <div class="health-bar-bg"><div id="hp-ship-main" class="hp-fill main-ship-hp" style="width: 100%;"></div></div>
+                </div>
+                <div class="health-card">
+                    <span class="enemy-label">⛵ Chalupa: Ranger</span>
+                    <div class="health-bar-bg"><div id="hp-ship-escort" class="hp-fill escort-ship-hp" style="width: 100%;"></div></div>
+                </div>
+                <div class="health-card">
+                    <span class="enemy-label">🦑 Kraken (Architeuthis Dux)</span>
+                    <div class="health-bar-bg"><div id="hp-kraken" class="hp-fill kraken-hp" style="width: 100%;"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NAVIO 1: Galeão Pirata Gigante (Ajustado para aparecer inteiro na tela) -->
+        <div id="enemy-ship" class="ship-spawn-anim enemy-target" data-type="main">
+            <div class="rigging r-fore"></div>
+            <div class="rigging r-main"></div>
+            
+            <div class="mast m-fore"><div class="crow-nest"></div></div>
+            <div class="mast m-main"><div class="crow-nest"></div></div>
+            <div class="mast m-mizzen"></div>
+
+            <div class="sail-group fore-sails">
+                <div class="sail real-sail s-top"></div>
+                <div class="sail real-sail s-bottom"></div>
+            </div>
+            <div class="sail-group main-sails">
+                <div class="sail real-sail m-top"></div>
+                <div class="sail real-sail m-bottom"></div>
+                <div class="jolly-roger-flag">☠️</div>
+            </div>
+            <div class="sail-group mizzen-sails">
+                <div class="sail real-sail spanker"></div>
+            </div>
+
+            <div class="ship-hull-realistic">
+                <div class="wood-planks"></div>
+                <div class="galleon-poop-deck">
+                    <div class="captain-cabin-windows"><span></span><span></span><span></span></div>
+                </div>
+                <div class="gun-ports">
+                    <span id="galleon-port-1" class="cannon-barrel-out"></span>
+                    <span id="galleon-port-2" class="cannon-barrel-out"></span>
+                    <span id="galleon-port-3" class="cannon-barrel-out"></span>
+                </div>
+                <div class="bowsprit"></div>
+            </div>
+            <div class="ship-lights"><span class="lantern-oil gold"></span><span class="lantern-oil red"></span></div>
+        </div>
+
+        <!-- NAVIO 2: Chalupa de Contrabando (Ajustada para aparecer inteira na tela) -->
+        <div id="escort-ship" class="ship-spawn-anim enemy-target" data-type="escort">
+            <div class="rigging r-sloop"></div>
+            <div class="mast m-sloop"></div>
+            <div class="sail real-sail sloop-main-sail"></div>
+            <div class="sail real-sail jib-sail"></div>
+            
+            <div class="ship-hull-realistic sloop-hull">
+                <div class="wood-planks"></div>
+                <div class="gun-ports">
+                    <span id="sloop-port-1" class="cannon-barrel-out"></span>
+                </div>
+                <div class="bowsprit sloop-bow"></div>
+            </div>
+            <div class="ship-lights"><span class="lantern-oil green"></span></div>
+        </div>
+
+        <!-- O KRAKEN ABISSAL (Ajustado para visualização completa) -->
+        <div id="kraken-boss" class="kraken-container enemy-target" data-type="kraken">
+            <div class="kraken-head">
+                <div class="kraken-eye left-eye"></div>
+                <div class="kraken-eye right-eye"></div>
+            </div>
+            <div class="tentacle t1"><div class="suction-cups"></div></div>
+            <div class="tentacle t2"><div class="suction-cups"></div></div>
+            <div class="tentacle t3"><div class="suction-cups"></div></div>
+            <div class="tentacle t4"><div class="suction-cups"></div></div>
+        </div>
+
+        <!-- Ondas Volumétricas -->
+        <div class="sea">
+            <div class="wave wave-back"></div>
+            <div class="wave wave-front"></div>
+        </div>
+
+        <!-- Canhão de Defesa do Jogador -->
+        <div id="player-cannon-container">
+            <div id="player-cannon">
+                <div class="cannon-barrel-reinforced"></div>
+                <div class="cannon-base-wood"></div>
+            </div>
+        </div>
+        <div id="crosshair"></div>
+    </section>
+
+    <!-- TELA DE GAME OVER -->
+    <section id="game-over-scene" class="scene hidden">
+        <div class="parchment-modal error-modal">
+            <div class="skull-burn">☠️</div>
+            <h2>Seu Casco foi Partido ao Meio!</h2>
+            <p>A artilharia pesada dos corsários transformou seu navio em destroços flutuantes. Você falhou em defender a costa de Tortuga.</p>
+            <button id="retry-btn" class="pirate-btn gold-glow">Remontar Navio e Voltar ao Mar</button>
+        </div>
+    </section>
+
+    <!-- PORTAS DA TABERNA -->
+    <div id="tavern-gate-container" class="hidden">
+        <div class="gate-half gate-left"></div>
+        <div class="gate-half gate-right"></div>
+    </div>
+
+    <!-- TELA DE CONTRATO (LOGIN) -->
+    <section id="login-scene" class="scene hidden">
+        <div class="pirate-contract-wrapper">
+            <div class="burnt-edge-scroll">
+                <div class="contract-header">
+                    <div class="cross-bones">⚔️</div>
+                    <h2>Charta Pirata & Alistamento</h2>
+                </div>
+                <form id="login-form">
+                    <div class="contract-input-group">
+                        <label>✍️ Alcunha do Corsário</label>
+                        <input type="text" id="pirate-name" required placeholder="Ex: Black Bellamy">
+                    </div>
+                    <div class="contract-input-group">
+                        <label>🔑 Código Secreto</label>
+                        <input type="password" id="pirate-secret" required placeholder="••••••••">
+                    </div>
+                    <div class="oath-box">
+                        <p>"Juro fidelidade ao navio, divisão justa de saques e coragem sob fogo de artilharia."</p>
+                    </div>
+                    <button type="submit" class="sign-contract-btn">Assinar e Entrar na Taberna</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- BANNER CINEMÁTICO -->
+    <div id="cinematic-banner" class="hidden">
+        <h1 id="welcome-captain-text">Entrando na Tortuga...</h1>
+    </div>
+
+    <!-- TABERNA EXPANDIDA COM CÓDEX MASSIVO DE PIRATARIA -->
+    <section id="tavern-dashboard" class="scene hidden">
+        <header class="tavern-header">
+            <nav class="wood-menu">
+                <button data-target="codex" class="menu-btn active">📜 Leis & Democracia</button>
+                <button data-target="lendas" class="menu-btn">🏴‍☠️ Grandes Almirantes</button>
+                <button data-target="curiosidades" class="menu-btn">🦜 Vida e Mitos</button>
+                <button data-target="navios-info" class="menu-btn">⚓ Anatomia Naval</button>
+                <button id="logout-btn" class="menu-btn logout-style">Voltar ao Mar</button>
+            </nav>
+        </header>
+        
+        <main class="tavern-content-wrapper">
+            <!-- ABA 1: LEIS E DEMOCRACIA -->
+            <div id="content-codex" class="tab-content active">
+                <h2>O Código Pirata (Charta Pirata)</h2>
+                <div class="wood-panel">
+                    <p>Ao contrário dos navios mercantes absolutistas, a pirataria operava sob uma das formas mais primitivas e puras de <strong>democracia direta</strong> do mundo moderno.</p>
+                    <br>
+                    <ul>
+                        <li><strong>Voto Igualitário:</strong> Todo tripulante tinha direito a voto em decisões críticas, incluindo a escolha do capitão, rotas de pilhagem e se deveriam ou não travar uma batalha.</li>
+                        <li><strong>O Contramestre (Quartermaster):</strong> Eleito pela tripulação para balancear o poder do capitão. Ele geria as provisões, cuidava do castigo dos homens e garantia a distribuição matemática exata dos saques.</li>
+                        <li><strong>Seguro de Acidentes:</strong> Havia uma tabela fixa de indenizações. Perder um braço direito rendia cerca de 600 moedas de prata (peças de oito); perder um olho rendia 100 moedas.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ABA 2: GRANDES LENDAS -->
+            <div id="content-lendas" class="tab-content">
+                <h2>Terror e Astúcia na Era de Ouro</h2>
+                <div class="wood-panel">
+                    <h3>Edward Teach (Barba Negra)</h3>
+                    <p>Mestre do terror psicológico. Ele colocava pavios de corda embebidos em água de pólvora acesos sob o chapéu, criando uma fumaça densa ao redor de seu rosto que fazia os inimigos acreditarem que ele era um demônio saído diretamente do inferno. Raras vezes ele precisou usar violência física real; os navios rendiam-se pelo medo.</p>
+                    <br>
+                    <h3>Bartholomew Roberts (Black Bart)</h3>
+                    <p>O pirata mais bem-sucedido da história em número de capturas (mais de 400 navios). Curiosamente, ele odiava futilidades: baniu jogos de azar a dinheiro a bordo, obrigava as luzes a se apagarem às 20h e era um homem profundamente religioso que proibia músicos de tocarem no domingo.</p>
+                </div>
+            </div>
+
+            <!-- ABA 3: CURIOSIDADES -->
+            <div id="content-curiosidades" class="tab-content">
+                <h2>Mitos Desmistificados e Cotidiano</h2>
+                <div class="wood-panel">
+                    <ul>
+                        <li><strong>Tapa-Olho:</strong> Raramente usado por cegueira. Os piratas usavam o tapa-olho para manter um dos olhos constantemente adaptado à escuridão. Ao descer rapidamente para os conveses inferiores escuros para lutar, eles trocavam o lado do tapa-olho e enxergavam instantaneamente sem precisar esperar a pupila dilatar.</li>
+                        <li><strong>Brincos de Ouro:</strong> Não eram apenas vaidade. Os brincos serviam como pagamento para o funeral do pirata caso seu corpo fosse encontrado em alguma praia distante. Eles gravavam o nome de sua cidade natal no interior da joia na esperança de um sepultamento digno.</li>
+                        <li><strong>Alimentação Cruel:</strong> O suprimento básico consistia em biscoitos marinhos severamente infestados de carunchos (larvas de besouros). Para não verem o que estavam comendo, os piratas costumavam comer no escuro absoluto abaixo do convés.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ABA 4: ANATOMIA NAVAL -->
+            <div id="content-navios-info" class="tab-content">
+                <h2>Tipos de Embarcações Corsárias</h2>
+                <div class="wood-panel">
+                    <p>A escolha do navio determinava a sobrevivência. Piratas astutos preferiam velocidade em vez de tamanho bruto.</p>
+                    <br>
+                    <table class="pirate-info-table">
+                        <thead>
+                            <tr>
+                                <th>Classe de Navio</th>
+                                <th>Peças de Artilharia</th>
+                                <th>Vantagem Estratégica</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Chalupa (Sloop)</strong></td>
+                                <td>4 a 12 canhões</td>
+                                <td>Rápida, calado raso para fugir por recifes onde navios da marinha encalhavam.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Corveta (Brig)</strong></td>
+                                <td>10 a 20 canhões</td>
+                                <td>Excelente equilíbrio entre espaço de carga para pilhagem e manobrabilidade de combate.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Galeão (Frigate/Galleon)</strong></td>
+                                <td>24 a 40+ canhões</td>
+                                <td>Fortalezas flutuantes. Usadas apenas por capitães lendários para sitiar fortificações inteiras.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>

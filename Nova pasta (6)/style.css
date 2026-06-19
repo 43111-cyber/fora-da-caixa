@@ -1,0 +1,215 @@
+/* ==========================================================================
+   1. AMBIENTAÇÃO E PROJEÇÃO DA ORLA NOTURNA
+   ========================================================================== */
+:root {
+    --bg-dark: #020408;
+    --sky-top: #01040f;
+    --sky-bottom: #080d22;
+    --sea-core: #03060f;
+    --wood-dark: #140d08;
+    --wood-light: #2c1a10;
+    --parchment: #e0cfab;
+    --gold: #d97706;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+body { background-color: var(--bg-dark); font-family: 'Georgia', serif; color: #e2e8f0; overflow: hidden; width: 100vw; height: 100vh; }
+
+.scene { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; transition: opacity 0.5s; }
+.hidden { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+
+.sky-gradient { position: absolute; width: 100%; height: 100%; background: linear-gradient(to bottom, var(--sky-top), var(--sky-bottom)); }
+.stars-layer { position: absolute; width: 100%; height: 50%; background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 100px 100px; opacity: 0.3; }
+.moon-glow { position: absolute; top: 30px; right: 15%; width: 120px; height: 120px; background: #fffde8; border-radius: 50%; box-shadow: 0 0 50px rgba(255, 253, 232, 0.3); }
+
+/* Sistema de Danos na Tela do Jogador */
+#player-damage-overlay { position: absolute; top:0; left:0; width:100%; height:100%; box-shadow: inset 0 0 100px rgba(220,38,38,0); z-index: 99; pointer-events: none; transition: box-shadow 0.1s ease; }
+.take-damage-flash { box-shadow: inset 0 0 150px rgba(220,38,38,0.85) !important; background: rgba(220, 38, 38, 0.15); }
+
+/* Mar Confortavelmente Posicionado */
+.sea { position: absolute; bottom: 0; width: 100%; height: 26vh; background: linear-gradient(to top, var(--sea-core), #050a18); z-index: 6; }
+.wave { position: absolute; width: 200%; height: 120px; bottom: 0; background-repeat: repeat-x; }
+.wave-back { z-index: 1; opacity: 0.3; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,40 C150,90 350,20 500,40 C650,60 850,90 1000,40 L1200,120 L0,120 Z" fill="%23050c1e"/></svg>'); animation: waveM 10s linear infinite; }
+.wave-front { z-index: 3; opacity: 1; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,60 C150,40 300,70 450,60 L1200,120 L0,120 Z" fill="%2302050d"/></svg>'); animation: waveM 4s ease-in-out infinite; }
+@keyframes waveM { 0% { transform: translateX(0); } 100% { transform: translateX(-20%); } }
+
+/* ==========================================================================
+   2. REPOSICIONAMENTO DOS BOSSES (INTEIROS SEM CORTES NA TELA)
+   ========================================================================== */
+/* Reajustado o 'bottom' de 16vh para 24vh para subir os cascos acima das barras de interface */
+#enemy-ship { position: absolute; bottom: 25vh; left: 45%; width: 500px; height: 380px; z-index: 4; }
+#escort-ship { position: absolute; bottom: 24vh; left: 4%; width: 290px; height: 240px; z-index: 5; }
+.kraken-container { position: absolute; bottom: 23vh; left: 28%; width: 220px; height: 180px; z-index: 3; filter: brightness(0.7); }
+
+.ship-spawn-anim { animation: heavyFloat 6s ease-in-out infinite; }
+#escort-ship.ship-spawn-anim { animation: heavyFloat 4.5s ease-in-out infinite alternate; }
+@keyframes heavyFloat { 0%, 100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-12px) rotate(2deg); } }
+
+/* Cascos Volumétricos */
+.ship-hull-realistic { position: absolute; bottom: 0; width: 100%; height: 90px; background: linear-gradient(var(--wood-light), var(--wood-dark)); border-radius: 4px 20px 120px 45px; border-top: 4px solid #4a2e1b; box-shadow: 0 15px 35px rgba(0,0,0,0.8); overflow: hidden; }
+.wood-planks { position: absolute; width: 100%; height: 100%; background: repeating-linear-gradient(rgba(0,0,0,0) 0px, rgba(0,0,0,0) 10px, rgba(0,0,0,0.3) 11px); }
+.galleon-poop-deck { position: absolute; bottom: 45px; left: 0; width: 140px; height: 60px; background: linear-gradient(#1f130b, var(--wood-dark)); border-right: 3px solid #361f11; }
+.captain-cabin-windows { display: flex; gap: 10px; position: absolute; top: 20px; left: 25px; }
+.captain-cabin-windows span { width: 14px; height: 22px; background: #f59e0b; box-shadow: 0 0 12px #f59e0b; border-radius: 2px; opacity: 0.8; border: 1px solid #000; }
+
+/* Escotilhas e Efeito Muzzle Flash */
+.gun-ports { display: flex; gap: 35px; position: absolute; top: 32px; left: 180px; }
+.cannon-barrel-out { width: 26px; height: 12px; background: #1e293b; border-radius: 4px 0 0 4px; border-right: 6px solid #000; box-shadow: -4px 4px 8px rgba(0,0,0,0.5); position: relative; }
+.muzzle-flash { animation: flashEffect 0.25s ease-out forwards; }
+@keyframes flashEffect {
+    0% { box-shadow: -20px 0px 40px 20px #ef4444, -10px 0 20px #f59e0b; filter: brightness(2); }
+    100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* Mastros e Velas */
+.mast { position: absolute; bottom: 85px; width: 12px; background: linear-gradient(90deg, #22140a, #3f2514); border-radius: 4px; }
+.m-fore { height: 250px; left: 320px; }
+.m-main { height: 290px; left: 210px; }
+.m-mizzen { height: 190px; left: 90px; }
+.crow-nest { position: absolute; top: 40px; left: -6px; width: 24px; height: 16px; background: #0f0905; border: 2px solid #2d190d; border-radius: 3px; }
+.rigging { position: absolute; bottom: 88px; border-bottom: 2px solid rgba(255,255,255,0.08); pointer-events: none; }
+.r-fore { width: 200px; height: 180px; left: 320px; transform: rotate(-40deg); }
+.r-main { width: 240px; height: 220px; left: 210px; transform: rotate(-35deg); }
+
+.real-sail { background: linear-gradient(135deg, #1e293b, #0f172a, #020617); border-radius: 10px 45px 35px 12px; box-shadow: inset -20px -10px 40px rgba(0,0,0,0.9), 0 10px 20px rgba(0,0,0,0.7); }
+.fore-sails .s-top { position: absolute; left: 330px; top: 60px; width: 100px; height: 80px; }
+.fore-sails .s-bottom { position: absolute; left: 330px; top: 155px; width: 120px; height: 90px; }
+.main-sails .m-top { position: absolute; left: 220px; top: 30px; width: 120px; height: 90px; }
+.main-sails .m-bottom { position: absolute; left: 220px; top: 130px; width: 140px; height: 105px; }
+.mizzen-sails .spanker { position: absolute; left: 100px; top: 70px; width: 80px; height: 95px; clip-path: polygon(0 0, 100% 20%, 85% 100%, 0 85%); }
+
+.bowsprit { position: absolute; top: 25px; right: -70px; width: 75px; height: 10px; background: #2d190d; transform: rotate(-10deg); border-radius: 0 6px 6px 0; }
+.jolly-roger-flag { position: absolute; top: -20px; left: 210px; background: #000; font-size: 16px; padding: 4px 6px; border: 1px solid rgba(255,255,255,0.1); animation: flagW 0.2s steps(2) infinite alternate; }
+@keyframes flagW { 0% { transform: skewY(-5deg); } 100% { transform: skewY(5deg); } }
+
+/* Chalupa (Sloop) */
+.sloop-hull { height: 70px; background: linear-gradient(#23170e, #0d0805); border-radius: 4px 15px 90px 35px; }
+.sloop-hull .gun-ports { top: 22px; left: 100px; }
+.m-sloop { height: 170px; left: 130px; width: 9px; }
+.sloop-main-sail { position: absolute; left: 140px; top: 40px; width: 95px; height: 110px; clip-path: polygon(0 0, 100% 25%, 80% 100%, 0 90%); }
+.jib-sail { position: absolute; left: 35px; top: 55px; width: 95px; height: 95px; background: linear-gradient(135deg, #1e293b, #020617); clip-path: polygon(100% 0, 0 100%, 100% 100%); }
+.sloop-bow { right: -45px; width: 50px; top: 20px; }
+
+/* Lanternas */
+.ship-lights .lantern-oil { position: absolute; width: 12px; height: 12px; border-radius: 50%; animation: oilF 0.2s infinite alternate; }
+.lantern-oil.gold { top: 15px; left: 10px; background: #f59e0b; box-shadow: 0 0 20px #f59e0b; }
+.lantern-oil.red { top: 250px; left: 210px; background: #dc2626; box-shadow: 0 0 20px #dc2626; }
+.lantern-oil.green { top: 40px; left: 130px; background: #10b981; box-shadow: 0 0 18px #10b981; }
+@keyframes oilF { 0% { opacity: 0.7; } 100% { opacity: 1; } }
+
+.ship-sinking { animation: heavySink 3s cubic-bezier(0.4, 0, 1, 1) forwards !important; }
+@keyframes heavySink { 100% { transform: translateY(250px) rotate(-22deg); opacity: 0; filter: blur(4px); } }
+
+/* Kraken */
+.kraken-head { position: absolute; bottom: -20px; left: 70px; width: 80px; height: 90px; background: linear-gradient(#230c3a, #080914); border-radius: 40px 40px 0 0; display: flex; justify-content: space-around; padding: 20px 10px; }
+.kraken-eye { width: 10px; height: 10px; background: #e11d48; border-radius: 50%; box-shadow: 0 0 15px #e11d48; }
+.tentacle { position: absolute; bottom: -20px; width: 18px; height: 140px; background: linear-gradient(to top, #080914, #3b0764, #6d28d9); border-radius: 8px; transform-origin: bottom center; }
+.t1 { left: 10px; animation: lash 4s ease-in-out infinite; }
+.t2 { left: 45px; height: 170px; animation: lash 3.2s ease-in-out infinite 0.3s; }
+.t3 { right: 45px; height: 160px; animation: lash 3.5s ease-in-out infinite 0.1s; }
+.t4 { right: 10px; animation: lash 4.2s ease-in-out infinite 0.5s; }
+@keyframes lash { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-12deg) scaleY(1.04); } }
+.kraken-dead { animation: kSink 2s ease-in forwards !important; }
+@keyframes kSink { 100% { transform: translateY(180px); opacity: 0; } }
+
+/* ==========================================================================
+   3. ESTILIZAÇÃO COMPLETA DA INTERFACE (HUD, VIDA JOGADOR, MATRIZES)
+   ========================================================================== */
+.battle-ui { position: absolute; top: 10px; width: 94%; max-width: 1000px; z-index: 25; display: flex; flex-direction: column; gap: 8px; }
+.top-status-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(2, 4, 8, 0.9); padding: 8px 16px; border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.3); }
+.timer-container { font-size: 1.1rem; font-weight: bold; color: #fff; text-shadow: 0 2px 4px #000; font-family: monospace; }
+
+/* Elementos da Barra do Jogador */
+.player-health-card { width: 45%; display: flex; flex-direction: column; gap: 3px; }
+.player-hp-label { font-size: 0.85rem; color: #ef4444; font-weight: bold; font-family: monospace; text-shadow: 0 1px 2px #000; }
+.player-hp { background: linear-gradient(90deg, #b91c1c, #ef4444); box-shadow: 0 0 10px #ef4444; }
+
+.enemies-health-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; background: rgba(2, 4, 8, 0.95); padding: 12px; border-radius: 4px; border: 1px solid rgba(217, 119, 6, 0.25); }
+.health-card { display: flex; flex-direction: column; gap: 4px; }
+.enemy-label { font-size: 0.8rem; color: #94a3b8; font-weight: bold; }
+.health-bar-bg { width: 100%; height: 8px; background: #000; overflow: hidden; border-radius: 2px; }
+.hp-fill { height: 100%; width: 100%; transition: width 0.15s ease; }
+.main-ship-hp { background: #dc2626; }
+.escort-ship-hp { background: #d97706; }
+.kraken-hp { background: #6d28d9; }
+
+/* Canhão do Jogador */
+#player-cannon-container { position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); z-index: 20; pointer-events: none; }
+#player-cannon { transform-origin: bottom center; display: flex; flex-direction: column; align-items: center; }
+.cannon-barrel-reinforced { width: 64px; height: 140px; background: linear-gradient(90deg, #0f172a, #334155, #020617); border-radius: 12px 12px 6px 6px; border: 3px solid #1e293b; }
+.cannon-base-wood { width: 95px; height: 35px; background: #1f130b; border-radius: 6px 6px 0 0; }
+.cannon-recoil { animation: rec 0.12s ease-out; }
+@keyframes rec { 0% { transform: scaleY(1); } 50% { transform: scaleY(0.75) translateY(15px); } 100% { transform: scaleY(1); } }
+
+#crosshair { position: absolute; width: 40px; height: 40px; border: 2px dashed #ef4444; border-radius: 50%; pointer-events: none; z-index: 100; transform: translate(-50%, -50%); }
+.cannon-ball { position: absolute; width: 16px; height: 16px; background: #0f172a; border-radius: 50%; z-index: 8; box-shadow: 0 4px 8px #000; }
+.particle { position: absolute; border-radius: 50%; pointer-events: none; z-index: 15; animation: pFade var(--duration) ease-out forwards; }
+@keyframes pFade { 0% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(var(--mx), var(--my)) scale(0); opacity: 0; } }
+
+/* ==========================================================================
+   4. ESTRUTURAÇÃO DO BANCO DE DADOS CÓDEX (TABERNA)
+   ========================================================================== */
+#tavern-dashboard { background: linear-gradient(rgba(0,0,0,0.96), rgba(0,0,0,0.98)), #080503; justify-content: flex-start; overflow-y: auto; padding-top: 85px; }
+.tavern-header { position: fixed; top: 0; width: 100%; z-index: 35; background: #0d0805; border-bottom: 2px solid #22140a; box-shadow: 0 4px 20px rgba(0,0,0,0.8); }
+.wood-menu { display: flex; justify-content: center; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
+.menu-btn { background: transparent; border: none; color: #94a3b8; padding: 18px 22px; font-family: inherit; font-size: 0.9rem; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+.menu-btn:hover, .menu-btn.active { background: #1a110a; color: var(--gold); border-bottom: 2px solid var(--gold); }
+.logout-style { background: #7f1d1d; color: #fff; margin-left: auto; }
+.logout-style:hover { background: #b91c1c; color: #fff; }
+
+.tavern-content-wrapper { width: 90%; max-width: 950px; margin: 40px auto; padding-bottom: 60px; }
+.tab-content { display: none; animation: panelFade 0.3s ease-in-out; }
+.tab-content.active { display: block; }
+@keyframes panelFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.tab-content h2 { color: var(--gold); margin-bottom: 18px; border-bottom: 1px solid #22140a; padding-bottom: 8px; font-size: 1.8rem; }
+.tab-content h3 { color: #f43f5e; margin: 20px 0 8px 0; font-size: 1.25rem; }
+.wood-panel { background: #050302; border: 1px solid #1a110a; padding: 30px; border-radius: 4px; line-height: 1.8; color: #cbd5e1; font-size: 1.05rem; box-shadow: inset 0 0 20px rgba(0,0,0,0.9); }
+.wood-panel ul { margin-left: 20px; padding-left: 10px; }
+.wood-panel li { margin-bottom: 12px; }
+.wood-panel strong { color: var(--gold); }
+
+/* Tabela de Navios */
+.pirate-info-table { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left; background: #090604; }
+.pirate-info-table th { background: #1a110a; color: var(--gold); padding: 12px; font-weight: bold; border: 1px solid #2c1a10; }
+.pirate-info-table td { padding: 12px; border: 1px solid #1a110a; font-size: 0.95rem; }
+.pirate-info-table tr:nth-child(even) { background: #0d0906; }
+
+/* Formulário de Contrato e Modais */
+.pirate-contract-wrapper { filter: drop-shadow(0 25px 35px #000); z-index: 30; }
+.burnt-edge-scroll { background: var(--parchment); color: #1f130b; padding: 35px; border: 10px solid #3f2514; width: 440px; max-width: 92vw; border-image: linear-gradient(#3f2514, #140d08) 10; }
+.contract-header { text-align: center; margin-bottom: 25px; border-bottom: 2px dashed #3f2514; padding-bottom: 10px; }
+.cross-bones { font-size: 2.2rem; }
+.contract-input-group { margin-bottom: 15px; }
+.contract-input-group label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 0.9rem; }
+.contract-input-group input { width: 100%; padding: 12px; border: 2px solid #3f2514; background: rgba(255, 255, 255, 0.4); font-size: 1rem; font-family: inherit; font-weight: bold; }
+.oath-box { background: rgba(0,0,0,0.06); padding: 12px; border-left: 3px solid #991b1b; font-style: italic; font-size: 0.85rem; margin-bottom: 20px; }
+.sign-contract-btn { width: 100%; padding: 14px; background: linear-gradient(#991b1b, #450a0a); color: var(--parchment); border: 2px solid #b45309; font-size: 1.05rem; font-weight: bold; text-transform: uppercase; cursor: pointer; }
+
+/* Modal Game Over */
+.parchment-modal { background: #140d08; border: 3px solid #dc2626; padding: 40px; text-align: center; max-width: 500px; border-radius: 4px; box-shadow: 0 20px 50px rgba(0,0,0,0.9); }
+.skull-burn { font-size: 3.5rem; animation: pulseGlow 1.5s infinite alternate; }
+@keyframes pulseGlow { from { filter: drop-shadow(0 0 2px #dc2626); } to { filter: drop-shadow(0 0 20px #dc2626); } }
+.parchment-modal h2 { color: #dc2626; margin: 15px 0; }
+.parchment-modal p { color: #94a3b8; margin-bottom: 25px; line-height: 1.6; }
+.pirate-btn { padding: 14px 28px; background: #dc2626; border: none; color: white; font-weight: bold; font-family: inherit; font-size: 1rem; cursor: pointer; border-radius: 2px; text-transform: uppercase; }
+.pirate-btn:hover { background: #b91c1c; }
+
+#tavern-gate-container { position: absolute; width: 100%; height: 100%; display: flex; z-index: 40; pointer-events: none; }
+.gate-half { width: 50%; height: 100%; background: #140d08; border: 4px solid #2c1a10; transition: transform 1s ease-in-out; }
+.gate-open .gate-left { transform: translateX(-100%); }
+.gate-open .gate-right { transform: translateX(100%); }
+
+#cinematic-banner { position: absolute; width: 100%; height: 100%; background: #000; z-index: 50; display: flex; justify-content: center; align-items: center; }
+#welcome-captain-text { font-size: 2.2rem; color: var(--gold); animation: bFade 2.5s forwards; opacity: 0; }
+@keyframes bFade { 0% { opacity: 0; } 20%, 80% { opacity: 1; } 100% { opacity: 0; } }
+
+.shake { animation: screenShake 0.2s ease-in-out infinite alternate; }
+@keyframes screenShake { 0% { transform: translate(2px, 1px) rotate(0deg); } 100% { transform: translate(-2px, -2px) rotate(0.5deg); } }
+
+@media (max-width: 768px) {
+    #enemy-ship { width: 320px; height: 260px; left: 15%; bottom: 26vh; }
+    #escort-ship { width: 180px; height: 160px; bottom: 25vh; left: 2%; }
+    .kraken-container { display: none; }
+    .player-health-card { width: 60%; }
+}
